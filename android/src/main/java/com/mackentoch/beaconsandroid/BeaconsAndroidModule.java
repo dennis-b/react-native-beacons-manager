@@ -398,7 +398,7 @@ public class BeaconsAndroidModule extends ReactContextBaseJavaModule implements 
       reactContext
         .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
         .emit(eventName, params);
-    }˚
+    }
   }
 
   private Region createRegion(String regionId, String beaconUuid) {
