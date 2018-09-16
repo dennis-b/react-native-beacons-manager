@@ -26,7 +26,9 @@ static NSString *const kEddystoneRegionID = @"EDDY_STONE_REGION_ID";
 
 @end
 
-@implementation RNiBeacon
+  @implementation RNiBeacon;
+
+NSMutableDictionary * notificationData = nil;
 
 RCT_EXPORT_MODULE()
 
@@ -34,18 +36,23 @@ RCT_EXPORT_MODULE()
 
 - (instancetype)init
 {
-  if (self = [super init]) {
-    self.locationManager = [[CLLocationManager alloc] init];
+  if (self =[super init]) {
+  self.locationManager =[[CLLocationManager alloc]init];
 
-    self.locationManager.delegate = self;
-    self.locationManager.pausesLocationUpdatesAutomatically = NO;
-    self.dropEmptyRanges = NO;
-      
-    self.eddyStoneScanner = [[ESSBeaconScanner alloc] init];
-    self.eddyStoneScanner.delegate = self;
-  }
+self.locationManager.delegate = self;
+self.locationManager.pausesLocationUpdatesAutomatically = NO;
+self.dropEmptyRanges = NO;
 
-  return self;
+self.eddyStoneScanner =[[ESSBeaconScanner alloc] init];
+self.eddyStoneScanner.delegate = self;
+
+notificationData =[[NSMutableDictionary alloc] init];
+notificationData[@"title"] = @"Nearby Gate";
+notificationData[@"body"] = @"Touch to lunch Park App";
+
+}
+
+return self;
 }
 
 - (NSArray<NSString *> *)supportedEvents
@@ -66,76 +73,76 @@ RCT_EXPORT_MODULE()
                                  major: (NSInteger) major
                                  minor:(NSInteger) minor
 {
-  NSUUID *beaconUUID = [[NSUUID alloc] initWithUUIDString:uuid];
+  NSUUID * beaconUUID =[[NSUUID alloc]initWithUUIDString : uuid];
 
-  unsigned short mj = (unsigned short) major;
-  unsigned short mi = (unsigned short) minor;
+unsigned short mj = (unsigned short) major;
+unsigned short mi = (unsigned short) minor;
 
-  CLBeaconRegion *beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:beaconUUID major:mj
-                                                                         minor:mi
-                                                                    identifier:identifier];
+CLBeaconRegion * beaconRegion =[[CLBeaconRegion alloc] initWithProximityUUID : beaconUUID major : mj
+minor : mi
+identifier : identifier];
 
-  NSLog(@"createBeaconRegion with: identifier - uuid - major - minor");
-  beaconRegion.notifyOnEntry = YES;
-  beaconRegion.notifyOnExit = YES;
-  beaconRegion.notifyEntryStateOnDisplay = YES;
+NSLog(@"createBeaconRegion with: identifier - uuid - major - minor");
+beaconRegion.notifyOnEntry = YES;
+beaconRegion.notifyOnExit = YES;
+beaconRegion.notifyEntryStateOnDisplay = YES;
 
-  return beaconRegion;
+return beaconRegion;
 }
 
 -(CLBeaconRegion *) createBeaconRegion: (NSString *) identifier
                                   uuid: (NSString *) uuid
                                  major: (NSInteger) major
 {
-  NSUUID *beaconUUID = [[NSUUID alloc] initWithUUIDString:uuid];
+  NSUUID * beaconUUID =[[NSUUID alloc]initWithUUIDString : uuid];
 
-  unsigned short mj = (unsigned short) major;
+unsigned short mj = (unsigned short) major;
 
-  CLBeaconRegion *beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:beaconUUID
-                                                                         major:mj
-                                                                    identifier:identifier];
+CLBeaconRegion * beaconRegion =[[CLBeaconRegion alloc] initWithProximityUUID : beaconUUID
+major : mj
+identifier : identifier];
 
-  NSLog(@"createBeaconRegion with: identifier - uuid - major");
-  beaconRegion.notifyOnEntry = YES;
-  beaconRegion.notifyOnExit = YES;
-  beaconRegion.notifyEntryStateOnDisplay = YES;
+NSLog(@"createBeaconRegion with: identifier - uuid - major");
+beaconRegion.notifyOnEntry = YES;
+beaconRegion.notifyOnExit = YES;
+beaconRegion.notifyEntryStateOnDisplay = YES;
 
-  return beaconRegion;
+return beaconRegion;
 }
 
 -(CLBeaconRegion *) createBeaconRegion: (NSString *) identifier
                                   uuid: (NSString *) uuid
 {
-  NSUUID *beaconUUID = [[NSUUID alloc] initWithUUIDString:uuid];
+  NSUUID * beaconUUID =[[NSUUID alloc]initWithUUIDString : uuid];
 
-  CLBeaconRegion *beaconRegion = [[CLBeaconRegion alloc] initWithProximityUUID:beaconUUID
-                                                                    identifier:identifier];
+CLBeaconRegion * beaconRegion =[[CLBeaconRegion alloc]initWithProximityUUID : beaconUUID
+identifier : identifier];
 
-  NSLog(@"createBeaconRegion with: identifier - uuid");
-  beaconRegion.notifyOnEntry = YES;
-  beaconRegion.notifyOnExit = YES;
-  beaconRegion.notifyEntryStateOnDisplay = YES;
+NSLog(@"createBeaconRegion with: identifier - uuid");
+beaconRegion.notifyOnEntry = YES;
+beaconRegion.notifyOnExit = YES;
+beaconRegion.notifyEntryStateOnDisplay = YES;
 
-  return beaconRegion;
+return beaconRegion;
 }
 
 -(CLBeaconRegion *) convertDictToBeaconRegion: (NSDictionary *) dict
 {
   if (dict[@"minor"] == nil) {
-    if (dict[@"major"] == nil) {
-      return [self createBeaconRegion:[RCTConvert NSString:dict[@"identifier"]]
-                                 uuid:[RCTConvert NSString:dict[@"uuid"]]];
-    } else {
-      return [self createBeaconRegion:[RCTConvert NSString:dict[@"identifier"]]
-                                 uuid:[RCTConvert NSString:dict[@"uuid"]]
-                                major:[RCTConvert NSInteger:dict[@"major"]]];
-    }
-  } else {
-    return [self createBeaconRegion:[RCTConvert NSString:dict[@"identifier"]]
-                               uuid:[RCTConvert NSString:dict[@"uuid"]]
-                              major:[RCTConvert NSInteger:dict[@"major"]]
-                              minor:[RCTConvert NSInteger:dict[@"minor"]]];
-  }
+  if (dict[@"major"] == nil) {
+  return[self createBeaconRegion :[RCTConvert NSString : dict[@"identifier"]]
+uuid :[RCTConvert NSString : dict[@"uuid"]]];
+} else {
+  return[self createBeaconRegion :[RCTConvert NSString : dict[@"identifier"]]
+uuid :[RCTConvert NSString : dict[@"uuid"]]
+major :[RCTConvert NSInteger : dict[@"major"]]];
+}
+} else {
+  return[self createBeaconRegion :[RCTConvert NSString : dict[@"identifier"]]
+uuid :[RCTConvert NSString : dict[@"uuid"]]
+major :[RCTConvert NSInteger : dict[@"major"]]
+minor :[RCTConvert NSInteger : dict[@"minor"]]];
+}
 }
 
 -(NSDictionary *) convertBeaconRegionToDict: (CLBeaconRegion *) region
@@ -143,48 +150,48 @@ RCT_EXPORT_MODULE()
   if (region.minor == nil) {
     if (region.major == nil) {
       return @{
-               @"identifier": region.identifier,
-               @"uuid": [region.proximityUUID UUIDString],
-               };
-    } else {
-      return @{
-               @"identifier": region.identifier,
-               @"uuid": [region.proximityUUID UUIDString],
-               @"major": region.major
-               };
-    }
-  } else {
-    return @{
-             @"identifier": region.identifier,
-             @"uuid": [region.proximityUUID UUIDString],
-             @"major": region.major,
-             @"minor": region.minor
-             };
-  }
+@"identifier" : region.identifier,
+@"uuid" :[region.proximityUUID UUIDString],
+};
+} else {
+  return @{
+@"identifier" : region.identifier,
+@"uuid" :[region.proximityUUID UUIDString],
+@"major" : region.major
+};
+}
+} else {
+  return @{
+@"identifier" : region.identifier,
+@"uuid" :[region.proximityUUID UUIDString],
+@"major" : region.major,
+@"minor" : region.minor
+};
+}
 }
 
 -(NSString *)stringForProximity:(CLProximity)proximity {
   switch (proximity) {
-    case CLProximityUnknown:    return @"unknown";
-    case CLProximityFar:        return @"far";
-    case CLProximityNear:       return @"near";
-    case CLProximityImmediate:  return @"immediate";
-    default:                    return @"";
+    case CLProximityUnknown : return @"unknown";
+    case CLProximityFar : return @"far";
+    case CLProximityNear : return @"near";
+    case CLProximityImmediate : return @"immediate";
+    default : return @"";
   }
 }
 
 RCT_EXPORT_METHOD(requestAlwaysAuthorization)
 {
-  if ([self.locationManager respondsToSelector:@selector(requestAlwaysAuthorization)]) {
-    [self.locationManager requestAlwaysAuthorization];
-  }
+  if ([self.locationManager respondsToSelector :@selector(requestAlwaysAuthorization)]) {
+[self.locationManager requestAlwaysAuthorization];
+}
 }
 
 RCT_EXPORT_METHOD(requestWhenInUseAuthorization)
 {
-  if ([self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
-    [self.locationManager requestWhenInUseAuthorization];
-  }
+  if ([self.locationManager respondsToSelector :@selector(requestWhenInUseAuthorization)]) {
+[self.locationManager requestWhenInUseAuthorization];
+}
 }
 
 RCT_EXPORT_METHOD(allowsBackgroundLocationUpdates:(BOOL)allow)
@@ -194,56 +201,62 @@ RCT_EXPORT_METHOD(allowsBackgroundLocationUpdates:(BOOL)allow)
 
 RCT_EXPORT_METHOD(getAuthorizationStatus:(RCTResponseSenderBlock)callback)
 {
-  callback(@[[self nameForAuthorizationStatus:[CLLocationManager authorizationStatus]]]);
+  callback(@[[self nameForAuthorizationStatus :[CLLocationManager authorizationStatus]]]);
 }
 
 RCT_EXPORT_METHOD(getMonitoredRegions:(RCTResponseSenderBlock)callback)
 {
-  NSMutableArray *regionArray = [[NSMutableArray alloc] init];
+  NSMutableArray * regionArray =[[NSMutableArray alloc]init];
 
-  for (CLBeaconRegion *region in self.locationManager.monitoredRegions) {
-    [regionArray addObject: [self convertBeaconRegionToDict: region]];
-  }
+for (CLBeaconRegion * region in self.locationManager.monitoredRegions) {
+[regionArray addObject :[self convertBeaconRegionToDict : region]];
+}
 
-  callback(@[regionArray]);
+callback(@[regionArray]);
 }
 
 RCT_EXPORT_METHOD(startMonitoringForRegion:(NSDictionary *) dict)
 {
-  [self.locationManager startMonitoringForRegion:[self convertDictToBeaconRegion:dict]];
+[self.locationManager startMonitoringForRegion :[self convertDictToBeaconRegion : dict]];
 }
 
 RCT_EXPORT_METHOD(startRangingBeaconsInRegion:(NSDictionary *) dict)
 {
-  if ([dict[@"identifier"] isEqualToString:kEddystoneRegionID]) {
-      [_eddyStoneScanner startScanning];
-  } else {
-      [self.locationManager startRangingBeaconsInRegion:[self convertDictToBeaconRegion:dict]];
-  }
+  if ([dict[@"identifier"]isEqualToString : kEddystoneRegionID]) {
+[_eddyStoneScanner startScanning];
+} else {
+[self.locationManager startRangingBeaconsInRegion :[self convertDictToBeaconRegion : dict]];
+}
 }
 
 RCT_EXPORT_METHOD(stopMonitoringForRegion:(NSDictionary *) dict)
 {
-  [self.locationManager stopMonitoringForRegion:[self convertDictToBeaconRegion:dict]];
+[self.locationManager stopMonitoringForRegion :[self convertDictToBeaconRegion : dict]];
 }
 
 RCT_EXPORT_METHOD(stopRangingBeaconsInRegion:(NSDictionary *) dict)
 {
-  if ([dict[@"identifier"] isEqualToString:kEddystoneRegionID]) {
-    [self.eddyStoneScanner stopScanning];
-  } else {
-    [self.locationManager stopRangingBeaconsInRegion:[self convertDictToBeaconRegion:dict]];
-  }
+  if ([dict[@"identifier"]isEqualToString : kEddystoneRegionID]) {
+[self.eddyStoneScanner stopScanning];
+} else {
+[self.locationManager stopRangingBeaconsInRegion :[self convertDictToBeaconRegion : dict]];
+}
+}
+
+RCT_EXPORT_METHOD(setNotificationData : (NSDictionary *) notifyData)
+{
+  notificationData[@"title"] = notifyData[@"title"];
+notificationData[@"body"] = notifyData[@"body"];
 }
 
 RCT_EXPORT_METHOD(startUpdatingLocation)
 {
-  [self.locationManager startUpdatingLocation];
+[self.locationManager startUpdatingLocation];
 }
 
 RCT_EXPORT_METHOD(stopUpdatingLocation)
 {
-  [self.locationManager stopUpdatingLocation];
+[self.locationManager stopUpdatingLocation];
 }
 
 RCT_EXPORT_METHOD(shouldDropEmptyRanges:(BOOL)drop)
@@ -254,19 +267,19 @@ RCT_EXPORT_METHOD(shouldDropEmptyRanges:(BOOL)drop)
 -(NSString *)nameForAuthorizationStatus:(CLAuthorizationStatus)authorizationStatus
 {
   switch (authorizationStatus) {
-    case kCLAuthorizationStatusAuthorizedAlways:
+    case kCLAuthorizationStatusAuthorizedAlways :
       return @"authorizedAlways";
 
-    case kCLAuthorizationStatusAuthorizedWhenInUse:
+    case kCLAuthorizationStatusAuthorizedWhenInUse :
       return @"authorizedWhenInUse";
 
-    case kCLAuthorizationStatusDenied:
+    case kCLAuthorizationStatusDenied :
       return @"denied";
 
-    case kCLAuthorizationStatusNotDetermined:
+    case kCLAuthorizationStatusNotDetermined :
       return @"notDetermined";
 
-    case kCLAuthorizationStatusRestricted:
+    case kCLAuthorizationStatusRestricted :
       return @"restricted";
   }
 }
@@ -292,21 +305,21 @@ RCT_EXPORT_METHOD(shouldDropEmptyRanges:(BOOL)drop)
 
 -(NSString *)stringForState:(CLRegionState)state {
   switch (state) {
-    case CLRegionStateInside:   return @"inside";
-    case CLRegionStateOutside:  return @"outside";
-    case CLRegionStateUnknown:  return @"unknown";
-    default:                    return @"unknown";
+    case CLRegionStateInside : return @"inside";
+    case CLRegionStateOutside : return @"outside";
+    case CLRegionStateUnknown : return @"unknown";
+    default : return @"unknown";
   }
 }
 
 - (void) locationManager:(CLLocationManager *)manager didDetermineState:(CLRegionState)state forRegion:(CLRegion *)region
 {
     NSDictionary *event = @{
-                          @"state":   [self stringForState:state],
-                          @"identifier":  region.identifier,
-                          };
+@"state" :[self stringForState : state],
+@"identifier" : region.identifier,
+};
 
-    [self sendEventWithName:@"didDetermineState" body:event];
+[self sendEventWithName:@"didDetermineState" body:event];
 }
 
 -(void) locationManager:(CLLocationManager *)manager didRangeBeacons:
@@ -315,44 +328,63 @@ RCT_EXPORT_METHOD(shouldDropEmptyRanges:(BOOL)drop)
   if (self.dropEmptyRanges && beacons.count == 0) {
     return;
   }
-  NSMutableArray *beaconArray = [[NSMutableArray alloc] init];
+  NSMutableArray * beaconArray =[[NSMutableArray alloc]init];
 
-  for (CLBeacon *beacon in beacons) {
-    [beaconArray addObject:@{
-                             @"uuid": [beacon.proximityUUID UUIDString],
-                             @"major": beacon.major,
-                             @"minor": beacon.minor,
+for (CLBeacon * beacon in beacons) {
+[beaconArray addObject :@{
+@"uuid" :[beacon.proximityUUID UUIDString],
+@"major" : beacon.major,
+@"minor" : beacon.minor,
 
-                             @"rssi": [NSNumber numberWithLong:beacon.rssi],
-                             @"proximity": [self stringForProximity: beacon.proximity],
-                             @"accuracy": [NSNumber numberWithDouble: beacon.accuracy],
-                             @"distance": [NSNumber numberWithDouble: beacon.accuracy],
-                             }];
-  }
-
-  NSDictionary *event = @{
-                          @"region": @{
-                              @"identifier": region.identifier,
-                              @"uuid": [region.proximityUUID UUIDString],
-                              },
-                          @"beacons": beaconArray
-                          };
-
-    [self sendEventWithName:@"beaconsDidRange" body:event];
+@"rssi" :[NSNumber numberWithLong : beacon.rssi],
+@"proximity" :[self stringForProximity : beacon.proximity],
+@"accuracy" :[NSNumber numberWithDouble : beacon.accuracy],
+@"distance" :[NSNumber numberWithDouble : beacon.accuracy],
+}];
 }
 
--(void)locationManager:(CLLocationManager *)manager
-        didEnterRegion:(CLBeaconRegion *)region {
-  NSDictionary *event = [self convertBeaconRegionToDict: region];
+NSDictionary * event = @{
+@"region" : @{
+@"identifier" : region.identifier,
+@"uuid" :[region.proximityUUID UUIDString],
+},
+@"beacons" : beaconArray
+};
 
-  [self sendEventWithName:@"regionDidEnter" body:event];
+[self sendEventWithName:@"beaconsDidRange" body:event];
+}
+
+-(void)locationManager : (CLLocationManager *)manager didEnterRegion : (CLBeaconRegion *)region {
+
+  NSDictionary * event =[self convertBeaconRegionToDict : region];
+[self sendEventWithName :@"regionDidEnter" body : event];
+
+UIApplicationState state =[[UIApplication sharedApplication]applicationState];
+if (state == UIApplicationStateBackground || state == UIApplicationStateInactive){
+[self scheduleLocalNotifications];
+}
+}
+
+
+- (void)scheduleLocalNotifications {
+
+  UILocalNotification * notification =[[UILocalNotification alloc]init];
+notification.timeZone =[NSTimeZone systemTimeZone];
+notification.category = @"messageLocal";
+notification.fireDate =[NSDate dateWithTimeIntervalSinceNow : 0];
+notification.alertTitle = notificationData[@"title"];
+notification.alertBody = notificationData[@"body"];
+notification.soundName = UILocalNotificationDefaultSoundName;
+  [[UIApplication sharedApplication] presentLocalNotificationNow : notification];
+// [notification release];
+
 }
 
 -(void)locationManager:(CLLocationManager *)manager
          didExitRegion:(CLBeaconRegion *)region {
-  NSDictionary *event = [self convertBeaconRegionToDict: region];
+           NSDictionary * event =[self convertBeaconRegionToDict : region];
 
-  [self sendEventWithName:@"regionDidExit" body:event];
+[self sendEventWithName :@"regionDidExit" body : event];
 }
 
 + (BOOL)requiresMainQueueSetup
