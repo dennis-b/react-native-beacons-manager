@@ -23,7 +23,7 @@ static NSString *const kEddystoneRegionID = @"EDDY_STONE_REGION_ID";
 @property(strong, nonatomic) CLLocationManager *locationManager;
 @property(strong, nonatomic) ESSBeaconScanner *eddyStoneScanner;
 @property(assign, nonatomic) BOOL dropEmptyRanges;
-@property(strong, nonatomic) NSString *title;
+@property(copy, nonatomic) NSString *title;
 @property(strong, nonatomic) NSString *body;
 @property(strong, nonatomic) NSMutableDictionary *notificationData;
 
