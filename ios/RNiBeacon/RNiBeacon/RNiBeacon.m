@@ -254,7 +254,6 @@ RCT_EXPORT_METHOD(setNotificationData :
     if (body != nil) {
         NSLog(@"RNiBeacon notification body: %@", body);
         self.body = [[NSString alloc] initWithFormat:@"%@", body];
-        NSLog(@"RNiBeacon notification body ====== : %@", self.body);
     }
 }
 
