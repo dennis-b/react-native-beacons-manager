@@ -23,12 +23,14 @@ static NSString *const kEddystoneRegionID = @"EDDY_STONE_REGION_ID";
 @property (strong, nonatomic) CLLocationManager *locationManager;
 @property (strong, nonatomic) ESSBeaconScanner *eddyStoneScanner;
 @property (assign, nonatomic) BOOL dropEmptyRanges;
+  @property (copy, nonatomic) NSString * title;
+  @property (copy, nonatomic) NSString * body;
+  @property (strong, nonatomic) NSMutableDictionary * notificationData;
 
-@end
+  @end
 
   @implementation RNiBeacon;
 
-NSMutableDictionary * notificationData = nil;
 
 RCT_EXPORT_MODULE()
 
@@ -46,9 +48,8 @@ self.dropEmptyRanges = NO;
 self.eddyStoneScanner =[[ESSBeaconScanner alloc] init];
 self.eddyStoneScanner.delegate = self;
 
-notificationData =[[NSMutableDictionary alloc] init];
-notificationData[@"title"] = @"Nearby Gate";
-notificationData[@"body"] = @"Touch to lunch Park App";
+self.title = @"Nearby Gate";
+self.body = @"Touch to lunch Park App";
 
 }
 
@@ -58,12 +59,12 @@ return self;
 - (NSArray<NSString *> *)supportedEvents
 {
     return @[
-             @"authorizationStatusDidChange",
-             @"beaconsDidRange",
-             @"regionDidEnter",
-             @"regionDidExit",
-             @"didDetermineState"
-             ];
+@"authorizationStatusDidChange",
+@"beaconsDidRange",
+@"regionDidEnter",
+@"regionDidExit",
+@"didDetermineState"
+];
 }
 
 #pragma mark
@@ -245,8 +246,19 @@ RCT_EXPORT_METHOD(stopRangingBeaconsInRegion:(NSDictionary *) dict)
 
 RCT_EXPORT_METHOD(setNotificationData : (NSDictionary *) notifyData)
 {
-  notificationData[@"title"] = notifyData[@"title"];
-notificationData[@"body"] = notifyData[@"body"];
+  NSString * title =[notifyData valueForKey :@"title"];
+NSString * body =[notifyData valueForKey :@"body"];
+
+if(title){
+  self.title = title;
+}
+
+if(body){
+  self.body = body;
+}
+
+NSLog(@"RNiBeacon notification title: %@", title);
+NSLog(@"RNiBeacon notification body: %@", body);
 }
 
 RCT_EXPORT_METHOD(startUpdatingLocation)
@@ -319,11 +331,11 @@ RCT_EXPORT_METHOD(shouldDropEmptyRanges:(BOOL)drop)
 @"identifier" : region.identifier,
 };
 
-[self sendEventWithName:@"didDetermineState" body:event];
+[self sendEventWithName :@"didDetermineState" body : event];
 }
 
 -(void) locationManager:(CLLocationManager *)manager didRangeBeacons:
-(NSArray *)beacons inRegion:(CLBeaconRegion *)region
+  (NSArray *)beacons inRegion : (CLBeaconRegion *)region
 {
   if (self.dropEmptyRanges && beacons.count == 0) {
     return;
@@ -351,7 +363,7 @@ NSDictionary * event = @{
 @"beacons" : beaconArray
 };
 
-[self sendEventWithName:@"beaconsDidRange" body:event];
+[self sendEventWithName :@"beaconsDidRange" body : event];
 }
 
 -(void)locationManager : (CLLocationManager *)manager didEnterRegion : (CLBeaconRegion *)region {
@@ -372,8 +384,8 @@ if (state == UIApplicationStateBackground || state == UIApplicationStateInactive
 notification.timeZone =[NSTimeZone systemTimeZone];
 notification.category = @"messageLocal";
 notification.fireDate =[NSDate dateWithTimeIntervalSinceNow : 0];
-notification.alertTitle = notificationData[@"title"];
-notification.alertBody = notificationData[@"body"];
+notification.alertTitle = self.title;
+notification.alertBody = self.body;
 notification.soundName = UILocalNotificationDefaultSoundName;
   [[UIApplication sharedApplication] presentLocalNotificationNow : notification];
 // [notification release];
@@ -398,19 +410,19 @@ notification.soundName = UILocalNotificationDefaultSoundName;
 
 - (void)notifyAboutBeaconChanges:(NSArray *)beacons {
     NSMutableArray *beaconArray = [[NSMutableArray alloc] init];
-    
+
     for (id key in beacons) {
         ESSBeaconInfo *beacon = key;
         NSDictionary *info = [self getEddyStoneInfo:beacon];
         [beaconArray addObject:info];
     }
     NSDictionary *event = @{
-                            @"region": @{
-                                    @"identifier": kEddystoneRegionID,
-                                    @"uuid": @"", // do not use for eddy stone
-                                    },
-                            @"beacons": beaconArray
-                            };
+@"region" : @{
+@"identifier" : kEddystoneRegionID,
+@"uuid" : @"", // do not use for eddy stone
+},
+@"beacons" : beaconArray
+};
     [self sendEventWithName:@"beaconsDidRange" body:event];
 }
 
@@ -419,12 +431,12 @@ notification.soundName = UILocalNotificationDefaultSoundName;
     NSNumber *distance = [self calculateDistance:info.txPower rssi:info.RSSI];
     NSString *identifier = [self getEddyStoneUUID:info.beaconID.beaconID];
     NSDictionary *beaconData = @{
-                                 @"identifier": identifier,
-                                 @"uuid": identifier,
-                                 @"rssi": info.RSSI,
-                                 @"txPower": info.txPower,
-                                 @"distance": distance,
-                                 };
+@"identifier" : identifier,
+@"uuid" : identifier,
+@"rssi" : info.RSSI,
+@"txPower" : info.txPower,
+@"distance" : distance,
+};
     return beaconData;
 }
 
@@ -432,13 +444,13 @@ notification.soundName = UILocalNotificationDefaultSoundName;
     if ([rssi floatValue] >= 0){
         return [NSNumber numberWithInt:-1];
     }
-    
-    float ratio = [rssi floatValue] / ([txPower floatValue] - 41);
+
+float ratio = [rssi floatValue] / ([txPower floatValue] - 41);
     if (ratio < 1.0) {
         return [NSNumber numberWithFloat:pow(ratio, 10)];
     }
-    
-    float distance = (0.89976) * pow(ratio, 7.7095) + 0.111;
+
+float distance = (0.89976) * pow(ratio, 7.7095) + 0.111;
     return [NSNumber numberWithFloat:distance];
 }
 
@@ -448,14 +460,14 @@ notification.soundName = UILocalNotificationDefaultSoundName;
     if (!dataBuffer) {
         return [NSString string];
     }
-    
-    NSMutableString *hexString  = [NSMutableString stringWithCapacity:(data.length * 2)];
+
+  NSMutableString *hexString  = [NSMutableString stringWithCapacity:(data.length * 2)];
     [hexString appendString:@"0x"];
     for (int i = 0; i < EDDYSTONE_UUID_LENGTH; ++i) {
         [hexString appendString:[NSString stringWithFormat:@"%02lx", (unsigned long)dataBuffer[i]]];
     }
-    
-    return [NSString stringWithString:hexString];
+
+return [NSString stringWithString:hexString];
 }
 
 @end
