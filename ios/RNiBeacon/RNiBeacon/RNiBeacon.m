@@ -26,6 +26,7 @@ static NSString *const kEddystoneRegionID = @"EDDY_STONE_REGION_ID";
 @property(copy, nonatomic) NSString *title;
 @property(strong, nonatomic) NSString *body;
 @property(strong, nonatomic) NSMutableDictionary *notificationData;
+@property(assign, nonatomic) NSTimeInterval notificationDelay;
 
 @end
 
@@ -46,6 +47,8 @@ RCT_EXPORT_MODULE()
 
         self.eddyStoneScanner = [[ESSBeaconScanner alloc] init];
         self.eddyStoneScanner.delegate = self;
+
+        self.notificationDelay = 5.0;
 
         self.title = @"Nearby Gate";
         self.body = @"Touch to lunch Park App";
@@ -240,33 +243,31 @@ RCT_EXPORT_METHOD(stopRangingBeaconsInRegion:
     }
 }
 
-RCT_EXPORT_METHOD(setNotificationData :
-(NSDictionary *) notifyData) {
+RCT_EXPORT_METHOD(setNotificationData :(NSDictionary *) notifyData) {
 
     NSString *title = notifyData[@"title"];
     NSString *body = notifyData[@"body"];
 
+    self.notificationDelay = 0;
     if (title != nil) {
-        NSLog(@"RNiBeacon notification title: %@", title);
         self.title = [[NSString alloc] initWithFormat:@"%@", title];
     }
 
     if (body != nil) {
-        NSLog(@"RNiBeacon notification body: %@", body);
         self.body = [[NSString alloc] initWithFormat:@"%@", body];
+
     }
 }
 
 RCT_EXPORT_METHOD(startUpdatingLocation) {
-        [self.locationManager startUpdatingLocation];
+    [self.locationManager startUpdatingLocation];
 }
 
 RCT_EXPORT_METHOD(stopUpdatingLocation) {
-        [self.locationManager stopUpdatingLocation];
+    [self.locationManager stopUpdatingLocation];
 }
 
-RCT_EXPORT_METHOD(shouldDropEmptyRanges:
-(BOOL) drop) {
+RCT_EXPORT_METHOD(shouldDropEmptyRanges:(BOOL) drop) {
     self.dropEmptyRanges = drop;
 }
 
@@ -361,15 +362,21 @@ RCT_EXPORT_METHOD(shouldDropEmptyRanges:
 
 - (void)locationManager:(CLLocationManager *)manager didEnterRegion:(CLBeaconRegion *)region {
 
-    NSDictionary *event = [self convertBeaconRegionToDict:region];
-    [self sendEventWithName:@"regionDidEnter" body:event];
 
+    NSLog(@"RNiBeacon locationManager didEnterRegion");
+    NSDictionary *event = [self convertBeaconRegionToDict:region];
+    [self performSelector:@selector(handleDidEnterRegion:) withObject:event afterDelay:self.notificationDelay ];
+
+
+}
+
+- (void)handleDidEnterRegion:(NSDictionary*) event{
+    [self sendEventWithName:@"regionDidEnter" body:event];
     UIApplicationState state = [[UIApplication sharedApplication] applicationState];
     if (state == UIApplicationStateBackground || state == UIApplicationStateInactive) {
         [self scheduleLocalNotifications];
     }
 }
-
 
 - (void)scheduleLocalNotifications {
 
