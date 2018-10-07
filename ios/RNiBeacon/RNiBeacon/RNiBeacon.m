@@ -51,7 +51,7 @@ RCT_EXPORT_MODULE()
         self.notificationDelay = 5.0;
 
         self.title = @"Nearby Gate";
-        self.body = @"Touch to lunch Park App";
+        self.body = @"Touch to launch Park App";
 
     }
 
