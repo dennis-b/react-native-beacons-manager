@@ -189,23 +189,20 @@ RCT_EXPORT_METHOD(requestAlwaysAuthorization) {
 }
 
 RCT_EXPORT_METHOD(requestWhenInUseAuthorization) {
-        if ([self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
-            [self.locationManager requestWhenInUseAuthorization];
-        }
+   if ([self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
+      [self.locationManager requestWhenInUseAuthorization];
+   }
 }
 
-RCT_EXPORT_METHOD(allowsBackgroundLocationUpdates:
-(BOOL) allow) {
+RCT_EXPORT_METHOD(allowsBackgroundLocationUpdates:(BOOL) allow) {
     self.locationManager.allowsBackgroundLocationUpdates = allow;
 }
 
-RCT_EXPORT_METHOD(getAuthorizationStatus:
-(RCTResponseSenderBlock) callback) {
+RCT_EXPORT_METHOD(getAuthorizationStatus:(RCTResponseSenderBlock) callback) {
     callback(@[[self nameForAuthorizationStatus:[CLLocationManager authorizationStatus]]]);
 }
 
-RCT_EXPORT_METHOD(getMonitoredRegions:
-(RCTResponseSenderBlock) callback) {
+RCT_EXPORT_METHOD(getMonitoredRegions:(RCTResponseSenderBlock) callback) {
     NSMutableArray *regionArray = [[NSMutableArray alloc] init];
 
     for (CLBeaconRegion *region in self.locationManager.monitoredRegions) {
@@ -215,13 +212,11 @@ RCT_EXPORT_METHOD(getMonitoredRegions:
     callback(@[regionArray]);
 }
 
-RCT_EXPORT_METHOD(startMonitoringForRegion:
-(NSDictionary *) dict) {
+RCT_EXPORT_METHOD(startMonitoringForRegion:(NSDictionary *) dict) {
     [self.locationManager startMonitoringForRegion:[self convertDictToBeaconRegion:dict]];
 }
 
-RCT_EXPORT_METHOD(startRangingBeaconsInRegion:
-(NSDictionary *) dict) {
+RCT_EXPORT_METHOD(startRangingBeaconsInRegion:(NSDictionary *) dict) {
     if ([dict[@"identifier"] isEqualToString:kEddystoneRegionID]) {
         [_eddyStoneScanner startScanning];
     } else {
@@ -229,13 +224,11 @@ RCT_EXPORT_METHOD(startRangingBeaconsInRegion:
     }
 }
 
-RCT_EXPORT_METHOD(stopMonitoringForRegion:
-(NSDictionary *) dict) {
+RCT_EXPORT_METHOD(stopMonitoringForRegion:(NSDictionary *) dict) {
     [self.locationManager stopMonitoringForRegion:[self convertDictToBeaconRegion:dict]];
 }
 
-RCT_EXPORT_METHOD(stopRangingBeaconsInRegion:
-(NSDictionary *) dict) {
+RCT_EXPORT_METHOD(stopRangingBeaconsInRegion:(NSDictionary *) dict) {
     if ([dict[@"identifier"] isEqualToString:kEddystoneRegionID]) {
         [self.eddyStoneScanner stopScanning];
     } else {
